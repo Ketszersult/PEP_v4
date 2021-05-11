@@ -1,14 +1,23 @@
 
 #include "playground.h"
 
-TaskHandle_t  HandleCreate, HandleLoad;
 
-SemaphoreHandle_t  SemaphoreShot,SemaphoreWin;
+
 bool UsartFlag;
 uint8_t UsartData;
 coordinate ship[16][8] = {
         {{2, 0}, {7, 0}, {17, 0}, {22, 0}, {2,  2}, {7,  2}, {17, 2}, {22, 2}},
         {{1, 1}, {3, 3}, {6,  1}, {8,  3}, {11, 1}, {13, 3}, {16, 1}, {18, 3}},
+		{{2, 0}, {7, 0}, {17, 0}, {22, 0}, {2,  2}, {7,  2}, {17, 2}, {22, 2}},
+		{{1, 1}, {3, 3}, {6,  1}, {8,  3}, {11, 1}, {13, 3}, {16, 1}, {18, 3}},
+		{{2, 0}, {7, 0}, {17, 0}, {22, 0}, {2,  2}, {7,  2}, {17, 2}, {22, 2}},
+		{{1, 1}, {3, 3}, {6,  1}, {8,  3}, {11, 1}, {13, 3}, {16, 1}, {18, 3}},
+		{{2, 0}, {7, 0}, {17, 0}, {22, 0}, {2,  2}, {7,  2}, {17, 2}, {22, 2}},
+		{{1, 1}, {3, 3}, {6,  1}, {8,  3}, {11, 1}, {13, 3}, {16, 1}, {18, 3}},
+		{{2, 0}, {7, 0}, {17, 0}, {22, 0}, {2,  2}, {7,  2}, {17, 2}, {22, 2}},
+	  	{{1, 1}, {3, 3}, {6,  1}, {8,  3}, {11, 1}, {13, 3}, {16, 1}, {18, 3}},
+	   	{{2, 0}, {7, 0}, {17, 0}, {22, 0}, {2,  2}, {7,  2}, {17, 2}, {22, 2}},
+		{{1, 1}, {3, 3}, {6,  1}, {8,  3}, {11, 1}, {13, 3}, {16, 1}, {18, 3}},
 };
 
 //inenn indul a jatek
@@ -17,7 +26,12 @@ uint16_t shotNumber = 0;
 
 //Letrehozza a palyat egy sablonbol
 static void TskCreateGameMap(void *pvParam){
-	while(true){
+	while(true)
+	{
+		vTaskSuspend(HandleCreate);
+		USART_Tx(UART0,'j');
+		//xSemaphoreTake(SemaphoreNewGame,portMAX_DELAY);
+
 		field template[5][5];
 		for (uint8_t i = 0; i < 5; ++i) {
 			for (uint8_t j = 0; j < 5; ++j) {
@@ -27,6 +41,7 @@ static void TskCreateGameMap(void *pvParam){
 				template[i][j].segment = 'x';
 			}
 		}
+
 		//A kijelzo szegmenseinek elhelezése a matrixban
 		template[2][4].segment = 'a';
 		template[0][3].segment = 'f';
@@ -51,21 +66,30 @@ static void TskCreateGameMap(void *pvParam){
 				}
 			}
 		}
-		vTaskSuspend(NULL);
+
+
+		TskShipLoadMap();
+
 	}
 }
 
 
 //random szam alapjan valaszt egy palya elrendezest es feltolti az ures palyat hajokkal
-static void TskShipLoadMap(void *pvParam) {
-	while (true){
-		uint8_t random = 1;
+void TskShipLoadMap() {
+
+		USART_Tx(UART0,'!');
+		//uint8_t random = 1;
+		//xQueueReceive(q, (void *)&random, portMAX_DELAY);
+
+		if(random < 0 || random>9)
+			random = 1;
+
 		for (uint8_t i = 0; i < 8; i++) {
 			if ('x' != map[ship[random][i].x][ship[random][i].y].segment)
 				map[ship[random][i].x][ship[random][i].y].ship = true;
 		}
-		vTaskSuspend(NULL);
-	}
+		//vTaskSuspend(NULL);
+
 }
 
 //Kirajzolja a palyat, azon elemekt ahol mar eltalaltak a hajokat
@@ -73,6 +97,7 @@ static void TskShowMap(void *pvParam) {
 	bool x;
     while (true)
     {
+
     for (uint8_t i = 0; i < 35; ++i) {
         for (uint8_t j = 0; j < 5; ++j) {
             if (true == map[i][j].ship && true == map[i][j].shot) //csak az eltalalt hajokat rajzolja ki
@@ -85,6 +110,7 @@ static void TskShowMap(void *pvParam) {
             }
         }
     }
+
     printOneLowerSegment(map[actualCoordinate.x][actualCoordinate.y].digitNumber,map[actualCoordinate.x][actualCoordinate.y].segment,x);
     x = !x;
     SegmentLCD_LowerSegments(lowerCharSegments); //Itt jelennek meg tenylegesen
@@ -127,37 +153,22 @@ static void TskWin(void *pvParam) {
 char win[] = "You WIN!!!!!\n";
     while (true)
     {
-        xSemaphoreTake(SemaphoreWin, portMAX_DELAY);
+USART_Tx(UART0,'w');
+
+		xSemaphoreTake(SemaphoreWin, portMAX_DELAY);
+
         SegmentLCD_AllOff();
         SegmentLCD_Write("You Win");
-        while (true)
-        {
+
         	for(int i = 0; win[i] != '\0'; i++){
         		USART_Tx(UART0,win[i]);
         	}
-        }
-        
+        	vTaskSuspend(HandleShow);
+
     }
     
 
 }
-
-
-
-//kijelzi azt a szegmenst, ahova eppen loni tudunk
-/*
-static void TskActualPosion(void *pvParam) {
-	bool x;
-    while (true)
-    {
-        printOneLowerSegment(map[actualCoordinate.x][actualCoordinate.y].digitNumber,map[actualCoordinate.x][actualCoordinate.y].segment,x);
-        SegmentLCD_LowerSegments(lowerCharSegments);
-        x = !x;
-        vTaskDelay(configTICK_RATE_HZ/2); // 0.5 sec delay
-
-    }
-}*/
-
 
 //ellenőrzi hogy minden hajót le lőttek e
 uint8_t checkShotedShip(){
@@ -170,9 +181,14 @@ uint8_t checkShotedShip(){
     }
     return 1;
 }
+
 static void TskUsartMove(void *pvParam){
 	while (true){
 		if(UsartFlag){
+			//xSemaphoreTake(SemaphoreUsart,portMAX_DELAY);
+		//vTaskSuspend(NULL);
+		//taskENTER_CRITICAL();
+			NVIC_DisableIRQ(UART0_RX_IRQn);
 			switch(UsartData){
 			case 'w':
 				up();
@@ -186,50 +202,52 @@ static void TskUsartMove(void *pvParam){
 			case 'd':
 				right();
 				break;
-			case 27: //ESC
-				vTaskResume(HandleCreate);
-				vTaskResume(HandleLoad);
+			case 'n': //ESC
+					random = USART_Rx(UART0)-'0';
+					SegmentLCD_AllOff();
+				shotNumber=0;
+				USART_IntClear(UART0, USART_IEN_RXDATAV);
+				NVIC_ClearPendingIRQ(UART0_RX_IRQn);
+					vTaskResume(HandleShow);
+					vTaskResume(HandleCreate);
+
 				break;
 			default:
 				xSemaphoreGive(SemaphoreShot);
 			}
-			UsartFlag = false;
+
+		UsartFlag = false;
+		//taskEXIT_CRITICAL();
+		NVIC_EnableIRQ(UART0_RX_IRQn);
 		}
+
 		vTaskDelay(configTICK_RATE_HZ/10);
 	}
 }
 
+
 void InitPlayGround(){
 	SemaphoreShot = xSemaphoreCreateBinary();
 	SemaphoreWin = xSemaphoreCreateBinary();
- xTaskCreate
-  (
-      TskCreateGameMap,
-      "TskCreateGameMap",
-      configMINIMAL_STACK_SIZE,
-      NULL,
-      tskIDLE_PRIORITY + 10,
-	  &HandleCreate
-  );
+	SemaphoreNewGame = xSemaphoreCreateBinary();
+	SemaphoreUsart = xSemaphoreCreateBinary();
 
- xTaskCreate
-  (
-      TskShipLoadMap,
-      "TskShipLoadMap",
-      configMINIMAL_STACK_SIZE,
-      NULL,
-      tskIDLE_PRIORITY + 9,
-	  &HandleLoad
-  );
-
+ xTaskCreate(
+					      TskCreateGameMap,
+					      "TskCreateGameMap",
+					      configMINIMAL_STACK_SIZE,
+					      NULL,
+					      tskIDLE_PRIORITY + 10,
+						  &HandleCreate
+					  );
  xTaskCreate
   (
       TskShowMap,
       "TskShowMap",
       configMINIMAL_STACK_SIZE,
       NULL,
-      tskIDLE_PRIORITY + 5,
-      NULL
+	  tskIDLE_PRIORITY+ 5,
+      &HandleShow
   );
 
  xTaskCreate
@@ -239,7 +257,7 @@ void InitPlayGround(){
       configMINIMAL_STACK_SIZE,
       NULL,
       tskIDLE_PRIORITY + 6,
-      NULL
+	  NULL
   );
 
  /*xTaskCreate
@@ -258,7 +276,7 @@ void InitPlayGround(){
       "TskWin",
       configMINIMAL_STACK_SIZE,
       NULL,
-      tskIDLE_PRIORITY + 10,
+      tskIDLE_PRIORITY + 7,
       NULL
   );
  xTaskCreate
@@ -267,7 +285,10 @@ void InitPlayGround(){
        "TskUsartMove",
        configMINIMAL_STACK_SIZE,
        NULL,
-       tskIDLE_PRIORITY + 7,
-       NULL
+       tskIDLE_PRIORITY + 11,
+	   &HandleUsart
    );
+
+ //vTaskSuspend(HandleShow);
+ //vTaskSuspend(HandleCreate);
 }

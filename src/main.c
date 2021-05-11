@@ -59,16 +59,24 @@ void Usart_init(void) {
 
 int main(void)
 {
+
 	SegmentLCD_Init(false);
 	SegmentLCD_AllOff();
+
 	Usart_init();
+
 	InitPlayGround();
+	//newGame();
 	vTaskStartScheduler();
 }
 
 void UART0_RX_IRQHandler(void){
 	UsartFlag = true;
+	//static BaseType_t  xSwitchRequired;
 	UsartData = USART_Rx(UART0);
 	USART_Tx(UART0,UsartData);
+	//xTaskResumeFromISR(HandleUsart);
 	USART_IntClear(UART0, USART_IEN_RXDATAV);
+	//xSemaphoreGiveFromISR(SemaphoreUsart,&xSwitchRequired);
+	//portYIELD_FROM_ISR(xSwitchRequired);
 }

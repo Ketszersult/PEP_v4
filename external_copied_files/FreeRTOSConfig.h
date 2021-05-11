@@ -110,7 +110,7 @@ extern "C" {
  * 1 - EM1, 2 - EM2, 3 - EM3, timer in EM3 is not very accurate*/
 #define configSLEEP_MODE           ( 1 )
 /* Definition used only if configUSE_TICKLESS_IDLE == 0 */
-#define configUSE_SLEEP_MODE_IN_IDLE       ( 1 )
+#define configUSE_SLEEP_MODE_IN_IDLE       ( 0 )
 
  
 /* EM1 use systick as system clock*/
@@ -141,7 +141,7 @@ extern "C" {
 #endif
 
 /* Main functions*/
-#define configMAX_PRIORITIES                      ( 3 )
+#define configMAX_PRIORITIES                      ( 15 )
 #define configMINIMAL_STACK_SIZE                  (( unsigned short ) 140)
 #define configTOTAL_HEAP_SIZE                     (( size_t )(9000))
 #define configMAX_TASK_NAME_LEN                   ( 10 )
@@ -192,7 +192,9 @@ extern "C" {
 #define INCLUDE_xTimerGetTimerDaemonTaskHandle    ( 0 )
 #define INCLUDE_pcTaskGetTaskName                 ( 0 )
 #define INCLUDE_eTaskGetState                     ( 0 )
-
+//
+#define INCLUDE_xTaskResumeFromISR              ( 1 )
+#define INCLUDE_xEventGroupSetBitFromISR        ( 1 )
 /* Default value of CPU clock (RC)*/
 #define configCPU_CLOCK_HZ                        (( unsigned long ) 14000000)
 
