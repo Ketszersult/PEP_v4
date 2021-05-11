@@ -54,7 +54,9 @@ void Usart_init(void) {
 	USART_IntClear(UART0, USART_IEN_RXDATAV);
 	USART_IntEnable(UART0, USART_IEN_RXDATAV);
 	NVIC_ClearPendingIRQ(UART0_RX_IRQn);
+	NVIC_SetPriority(UART0_RX_IRQn,5);
 	NVIC_EnableIRQ(UART0_RX_IRQn);
+
 }
 
 int main(void)
@@ -72,11 +74,11 @@ int main(void)
 
 void UART0_RX_IRQHandler(void){
 	UsartFlag = true;
-	//static BaseType_t  xSwitchRequired;
+	static BaseType_t  xSwitchRequired;
 	UsartData = USART_Rx(UART0);
 	USART_Tx(UART0,UsartData);
 	//xTaskResumeFromISR(HandleUsart);
 	USART_IntClear(UART0, USART_IEN_RXDATAV);
-	//xSemaphoreGiveFromISR(SemaphoreUsart,&xSwitchRequired);
-	//portYIELD_FROM_ISR(xSwitchRequired);
+	xSemaphoreGiveFromISR(SemaphoreUsart,&xSwitchRequired);
+	portYIELD_FROM_ISR(xSwitchRequired);
 }

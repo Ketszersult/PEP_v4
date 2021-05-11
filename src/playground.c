@@ -184,8 +184,8 @@ uint8_t checkShotedShip(){
 
 static void TskUsartMove(void *pvParam){
 	while (true){
-		if(UsartFlag){
-			//xSemaphoreTake(SemaphoreUsart,portMAX_DELAY);
+		//if(UsartFlag){
+			xSemaphoreTake(SemaphoreUsart,portMAX_DELAY);
 		//vTaskSuspend(NULL);
 		//taskENTER_CRITICAL();
 			NVIC_DisableIRQ(UART0_RX_IRQn);
@@ -219,9 +219,9 @@ static void TskUsartMove(void *pvParam){
 		UsartFlag = false;
 		//taskEXIT_CRITICAL();
 		NVIC_EnableIRQ(UART0_RX_IRQn);
-		}
+		//}
 
-		vTaskDelay(configTICK_RATE_HZ/10);
+		//vTaskDelay(configTICK_RATE_HZ/10);
 	}
 }
 
