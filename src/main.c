@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/***************************************************************************/ /**
  * @file main.c
  * @brief main() function.
  *******************************************************************************
@@ -19,9 +19,10 @@
 #include "em_cmu.h"
 #include "movement.h"
 
-extern bool UsartFlag;
 extern uint8_t UsartData;
-void Usart_init(void) {
+
+void Usart_init(void)
+{
 	// Enable clock for GPIO
 	CMU->HFPERCLKEN0 |= CMU_HFPERCLKEN0_GPIO;
 	// Set PF7 to high
@@ -46,7 +47,6 @@ void Usart_init(void) {
 	GPIO_PinModeSet(gpioPortE, 1, gpioModeInput, 0);
 	// Use PE0 as TX and PE1 as RX (Location 1, see datasheet (not refman))
 	// Enable both RX and TX for routing
-	//USART_Enable(UART0,usartEnable);
 	UART0->ROUTE |= UART_ROUTE_LOCATION_LOC1;
 	// Select "Location 1" as the routing configuration
 	UART0->ROUTE |= UART_ROUTE_TXPEN | UART_ROUTE_RXPEN;
@@ -54,31 +54,25 @@ void Usart_init(void) {
 	USART_IntClear(UART0, USART_IEN_RXDATAV);
 	USART_IntEnable(UART0, USART_IEN_RXDATAV);
 	NVIC_ClearPendingIRQ(UART0_RX_IRQn);
-	NVIC_SetPriority(UART0_RX_IRQn,5);
+	NVIC_SetPriority(UART0_RX_IRQn, 5);
 	NVIC_EnableIRQ(UART0_RX_IRQn);
-
 }
 
 int main(void)
 {
-
 	SegmentLCD_Init(false);
 	SegmentLCD_AllOff();
-
 	Usart_init();
-
 	InitPlayGround();
-	//newGame();
 	vTaskStartScheduler();
 }
 
-void UART0_RX_IRQHandler(void){
-	UsartFlag = true;
-	static BaseType_t  xSwitchRequired;
+void UART0_RX_IRQHandler(void)
+{
+	static BaseType_t xSwitchRequired;
 	UsartData = USART_Rx(UART0);
-	USART_Tx(UART0,UsartData);
-	//xTaskResumeFromISR(HandleUsart);
+	USART_Tx(UART0, UsartData);
 	USART_IntClear(UART0, USART_IEN_RXDATAV);
-	xSemaphoreGiveFromISR(SemaphoreUsart,&xSwitchRequired);
+	xSemaphoreGiveFromISR(SemaphoreUsart, &xSwitchRequired);
 	portYIELD_FROM_ISR(xSwitchRequired);
 }

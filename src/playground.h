@@ -7,7 +7,6 @@
 #include "stdio.h"
 #include "lcd.h"
 
-
 #include "FreeRTOS.h" // Ez legyen az első FreeRTOS header
 #include "task.h"
 #include "semphr.h"
@@ -32,14 +31,12 @@ typedef struct {
 } coordinate;
 
 volatile field map[35][5];
-SemaphoreHandle_t  SemaphoreShot,SemaphoreWin,SemaphoreUsart,SemaphoreNewGame;
-TaskHandle_t  HandleCreate,HandleShow,HandleUsart;
+SemaphoreHandle_t  SemaphoreShot,SemaphoreWin,SemaphoreUsart;
+TaskHandle_t  HandleCreate,HandleShow;
 
-bool UsartFlag;
 uint8_t UsartData;
 void InitPlayGround();
 uint8_t checkShotedShip();
 void TskShipLoadMap();
-QueueHandle_t  q;
 int random;
 #endif /* SRC_PLAYGROUND_H_ */
