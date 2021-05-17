@@ -341,6 +341,8 @@ int main(int argc, char *argv[])
             if(c == 'n'){
               printf("New game\n");
               printf("Press a number: \n");
+                
+              //Write timestamp
               time_t clk = time(NULL);
               char time_str[35];
               memset(&time_str, 0, sizeof(time_str));
