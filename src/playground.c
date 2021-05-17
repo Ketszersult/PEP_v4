@@ -22,7 +22,7 @@ coordinate actualCoordinate = {2, 0};
 uint16_t shotNumber = 0;
 
 //megadott szam alapjan valaszt egy palya elrendezest es feltolti az ures palyat hajokkal
-void TskShipLoadMap()
+void ShipLoadMap()
 {
 	//USART_Tx(UART0, 'L');
 	if (random < 0 || random > 9)
@@ -96,7 +96,7 @@ static void TskCreateGameMap(void *pvParam)
 				}
 			}
 		}
-		TskShipLoadMap();
+		ShipLoadMap();
 	}
 }
 
@@ -250,34 +250,34 @@ void InitPlayGround()
 		"TskCreateGameMap",
 		configMINIMAL_STACK_SIZE,
 		NULL,
-		tskIDLE_PRIORITY + 10,
+		tskIDLE_PRIORITY + 4,
 		&HandleCreate);
 	xTaskCreate(
 		TskShowMap,
 		"TskShowMap",
 		configMINIMAL_STACK_SIZE,
 		NULL,
-		tskIDLE_PRIORITY + 5,
+		tskIDLE_PRIORITY + 1,
 		&HandleShow);
 	xTaskCreate(
 		TskShot,
 		"TskShot",
 		configMINIMAL_STACK_SIZE,
 		NULL,
-		tskIDLE_PRIORITY + 6,
+		tskIDLE_PRIORITY + 2,
 		NULL);
 	xTaskCreate(
 		TskWin,
 		"TskWin",
 		configMINIMAL_STACK_SIZE,
 		NULL,
-		tskIDLE_PRIORITY + 7,
+		tskIDLE_PRIORITY + 3,
 		NULL);
 	xTaskCreate(
 		TskUsartMove,
 		"TskUsartMove",
 		configMINIMAL_STACK_SIZE,
 		NULL,
-		tskIDLE_PRIORITY + 11,
+		tskIDLE_PRIORITY + 5,
 		NULL);
 }
