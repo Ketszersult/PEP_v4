@@ -24,7 +24,7 @@ uint16_t shotNumber = 0;
 //megadott szam alapjan valaszt egy palya elrendezest es feltolti az ures palyat hajokkal
 void TskShipLoadMap()
 {
-	USART_Tx(UART0, 'L');
+	//USART_Tx(UART0, 'L');
 	if (random < 0 || random > 9)
 		random = 1;
 	for (uint8_t i = 0; i < 8; i++)
@@ -56,7 +56,7 @@ static void TskCreateGameMap(void *pvParam)
 	while (true)
 	{
 		vTaskSuspend(HandleCreate);
-		USART_Tx(UART0, 'C');
+		//USART_Tx(UART0, 'C');
 		field template[5][5];
 		for (uint8_t i = 0; i < 5; ++i)
 		{
@@ -171,10 +171,12 @@ static void TskShot(void *pvParam)
 
 static void TskWin(void *pvParam)
 {
-	char win[] = "You WIN!!!!!\n";
+	char win[] = "You WIN!!!\n";
+	char temp[30]={};
+
 	while (true)
 	{
-		USART_Tx(UART0, 'W');
+		//USART_Tx(UART0, 'W');
 
 		xSemaphoreTake(SemaphoreWin, portMAX_DELAY);
 
@@ -184,6 +186,12 @@ static void TskWin(void *pvParam)
 		for (int i = 0; win[i] != '\0'; i++)
 		{
 			USART_Tx(UART0, win[i]);	//kiírja soros portra, hogy nyertünk
+		}
+
+		sprintf(temp,"%d%%\n",((800/shotNumber)));
+		for (int i = 0; temp[i] != '\0'; i++)
+		{
+			USART_Tx(UART0, temp[i]);
 		}
 		vTaskSuspend(HandleShow);		//megállítja a játékot
 	}
@@ -213,11 +221,16 @@ static void TskUsartMove(void *pvParam)
 			random = USART_Rx(UART0) - '0';	//bekér egy számot, hogy melyik pályát választjuk
 			SegmentLCD_AllOff();
 			shotNumber = 0;
-			actualCoordinate = {2, 0};
+			actualCoordinate.x = 2;
+			actualCoordinate.y = 0;
 			USART_IntClear(UART0, USART_IEN_RXDATAV);
 			NVIC_ClearPendingIRQ(UART0_RX_IRQn);
 			vTaskResume(HandleShow);		//új játékot kezdeményez
 			vTaskResume(HandleCreate);
+			break;
+		case '\n':
+			break;
+		case '\r':
 			break;
 		default:
 			xSemaphoreGive(SemaphoreShot);	//lő ha bármilyen nem definiált karaktert kap

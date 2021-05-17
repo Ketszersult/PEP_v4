@@ -71,7 +71,7 @@ void UART0_RX_IRQHandler(void)
 {
 	static BaseType_t xSwitchRequired;
 	UsartData = USART_Rx(UART0);
-	USART_Tx(UART0, UsartData);
+	//USART_Tx(UART0, UsartData);
 	USART_IntClear(UART0, USART_IEN_RXDATAV);
 	xSemaphoreGiveFromISR(SemaphoreUsart, &xSwitchRequired);
 	portYIELD_FROM_ISR(xSwitchRequired);
