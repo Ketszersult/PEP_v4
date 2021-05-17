@@ -227,7 +227,7 @@ int main(int argc, char *argv[])
     //LOG file create if log file doesn't exist and log file name is not "stdout"
     if (strcmp(g_outfile, "stdout") != 0)
     {
-        out_file = open(g_outfile, O_RDWR | O_CREAT, 0644);
+        out_file = open(g_outfile, O_RDWR|O_APPEND | O_CREAT, 0644);
         if (out_file < 0)
         {
             perror("Log file open failed");
@@ -341,6 +341,11 @@ int main(int argc, char *argv[])
             if(c == 'n'){
               printf("New game\n");
               printf("Press a number: \n");
+              time_t clk = time(NULL);
+              char time_str[35];
+              memset(&time_str, 0, sizeof(time_str));
+              sprintf(time_str, "%s", ctime(&clk));
+              write(out_file, time_str, strlen(time_str));
             }
                
         }
