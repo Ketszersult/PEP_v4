@@ -37,6 +37,6 @@ TaskHandle_t  HandleCreate,HandleShow;
 uint8_t UsartData;
 void InitPlayGround();
 uint8_t checkShotedShip();
-void TskShipLoadMap();
+void ShipLoadMap();
 int random;
 #endif /* SRC_PLAYGROUND_H_ */
