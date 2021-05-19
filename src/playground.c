@@ -202,7 +202,6 @@ static void TskUsartMove(void *pvParam)
 	while (true)
 	{
 		xSemaphoreTake(SemaphoreUsart, portMAX_DELAY);
-		NVIC_DisableIRQ(UART0_RX_IRQn);
 		switch (UsartData)
 		{
 		case 'w':
@@ -218,15 +217,17 @@ static void TskUsartMove(void *pvParam)
 			right();
 			break;
 		case 'n': //ESC
+			NVIC_DisableIRQ(UART0_RX_IRQn);
 			random = USART_Rx(UART0) - '0';	//bekér egy számot, hogy melyik pályát választjuk
 			SegmentLCD_AllOff();
 			shotNumber = 0;
 			actualCoordinate.x = 2;
 			actualCoordinate.y = 0;
-			USART_IntClear(UART0, USART_IEN_RXDATAV);
-			NVIC_ClearPendingIRQ(UART0_RX_IRQn);
 			vTaskResume(HandleShow);		//új játékot kezdeményez
 			vTaskResume(HandleCreate);
+			USART_IntClear(UART0, USART_IEN_RXDATAV);
+			NVIC_ClearPendingIRQ(UART0_RX_IRQn);
+			NVIC_EnableIRQ(UART0_RX_IRQn);
 			break;
 		case '\n':
 			break;
@@ -235,7 +236,6 @@ static void TskUsartMove(void *pvParam)
 		default:
 			xSemaphoreGive(SemaphoreShot);	//lő ha bármilyen nem definiált karaktert kap
 		}
-		NVIC_EnableIRQ(UART0_RX_IRQn);
 	}
 }
 
